@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo:4.2-bionic
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    hostname: zapret-info-mongo
+    container_name: zapret-info-mongo
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "50"
+    restart: always
+    volumes:
+      - ./data/mongo:/data/mongo
+    ports:
+      - 127.0.0.1:27017:27017
+
+  updater:
+    build: ./updater
+    environment:
+      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@zapret-info-mongo:27017/blocked?authMechanism=DEFAULT&authSource=admin
+      - DESTINATION_DIR=${DESTINATION_DIR}
+    image: zapret-info/updater
+    container_name: zapret-info-updater
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "50"
+    restart: always
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    volumes:
+      - ./data/archive:${DESTINATION_DIR}
