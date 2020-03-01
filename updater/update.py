@@ -25,7 +25,7 @@ def import_file(filename):
 
             ips = components[0].split(' | ')
             domain = components[1]
-            url = components[2]
+            url = components[2].strip('"')
             decision_org = components[3]
             decision_num = components[4]
             decision_date = components[5]
